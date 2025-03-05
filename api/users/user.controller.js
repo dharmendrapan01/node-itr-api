@@ -1,5 +1,5 @@
 const { genSaltSync, hashSync, compareSync } = require("bcrypt");
-const { userRegister, getUsers, getUserById, updateUser, deleteUser, userLogin } = require("./user.service");
+const { userRegister, getUsers, getUserById, updateUser, deleteUser, userLogin, OTPValidate } = require("./user.service");
 const { sign } = require("jsonwebtoken");
 
 module.exports = { 
@@ -41,6 +41,19 @@ module.exports = {
         } catch (error) {
             return res.status(400).json({ error: error });
         }
+    },
+
+    userOTP : async (req, res) => {
+        const body = req.body;
+        OTPValidate(body.mobile, body.otp, (error, results) => {
+            if(error) {
+                return res.status(400).json({ success: 0, error: error });
+            }
+            if(!results) {
+                return res.json({ success: 0, message: "Invalid OTP" });
+            }
+            return res.status(200).json({ success: 1, data: results });
+        })
     },
 
     getUsers : async (req, res) => {
