@@ -4,7 +4,7 @@ const { validateToken } = require("../../auth/token_validation");
 
 router.post("/", validateToken, createUser);
 router.post("/login", login);
-router.post("/otp", validateToken, userOTP);
+router.post("/verifyotp", userOTP);
 router.get("/", validateToken, getUsers);
 router.get("/:id", validateToken, getUserById);
 router.patch("/", validateToken, updateUser);

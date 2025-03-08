@@ -72,13 +72,38 @@ module.exports = {
 
     OTPValidate : async (mobile, otp, callBack) => {
         pool.query(
-            `select * from users where Mobile = ? and UserOTP = ?`,
-            [mobile, otp],
+            `select * from users where Mobile = ?`,
+            [mobile],
             (error, results, fields) => {
+                const currentDate = new Date();
+                if (results.length > 0) {
+                    return callBack(null, results[0]);
+                }else{
+                    pool.query(
+                        `insert into users (Mobile, CreatedAt, UpdatedAt) values (?,?,?)`,
+                        [
+                            mobile,        
+                            currentDate,
+                            currentDate
+                        ],
+                        (error, results, fields) => {
+                            console.log('Inserted ID:', results.insertId);
+                            pool.query(
+                                `select * from users where id = ?`,
+                                [results.insertId],
+                                (error, results, fields) => {
+                                    if(error) {
+                                        return callBack(error);
+                                    }
+                                    return callBack(null, results[0]);
+                                }
+                            )
+                        }
+                    )
+                }
                 if(error) {
                     return callBack(error);
                 }
-                return callBack(null, results[0]);
             }
         )
     },

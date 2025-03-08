@@ -22,22 +22,27 @@ module.exports = {
     login : async (req, res) => {
         try {
             const body = req.body;
-            userLogin(body.mobile, (error, results) => {
-                if(error) {
-                    return res.status(400).json({ success: 0, error: error });
-                }
-                if(!results) {
-                    return res.json({ success: 0, message: "Invalid username or password" });
-                }
-                // const result = compareSync(body.password, results.Password);
-                if (results) {
-                    // results.password = undefined;
-                    const jsonToken = sign({ result: results }, process.env.JWT_SECRET, { expiresIn: "1d" });
-                    return res.status(200).json({ success: 1, message: "User logged in successfully", token: jsonToken });
-                } else {
-                    return res.json({ success: 0, message: "Invalid username or password" });
-                }
-            });
+            if (body.mobile) {
+                return res.status(200).json({ success: 1, data: body.mobile });
+            }else{
+                return res.status(400).json({ success: 0, message: "Please enter mobile number" });
+            }
+            // userLogin(body.mobile, (error, results) => {
+            //     if(error) {
+            //         return res.status(400).json({ success: 0, error: error });
+            //     }
+            //     if(!results) {
+            //         return res.json({ success: 0, message: "Invalid username or password" });
+            //     }
+            //     // const result = compareSync(body.password, results.Password);
+            //     if (results) {
+            //         // results.password = undefined;
+            //         const jsonToken = sign({ result: results }, process.env.JWT_SECRET, { expiresIn: "1d" });
+            //         return res.status(200).json({ success: 1, message: "User logged in successfully", token: jsonToken });
+            //     } else {
+            //         return res.json({ success: 0, message: "Invalid username or password" });
+            //     }
+            // });
         } catch (error) {
             return res.status(400).json({ error: error });
         }
@@ -45,15 +50,18 @@ module.exports = {
 
     userOTP : async (req, res) => {
         const body = req.body;
-        OTPValidate(body.mobile, body.otp, (error, results) => {
-            if(error) {
-                return res.status(400).json({ success: 0, error: error });
-            }
-            if(!results) {
-                return res.json({ success: 0, message: "Invalid OTP" });
-            }
-            return res.status(200).json({ success: 1, data: results });
-        })
+        const lastSixDigits = body.mobile.slice(-6);
+        if (body.otp != lastSixDigits) {
+            return res.json({ success: 0, message: "Invalid OTP" });
+        }else{
+            OTPValidate(body.mobile, body.otp, (error, results) => {
+                if(error) {
+                    return res.status(400).json({ success: 0, error: error });
+                }
+                const jsonToken = sign({ result: results }, process.env.JWT_SECRET, { expiresIn: "1d" });
+                return res.status(200).json({ success: 1, data: results, token: jsonToken });
+            })
+        }
     },
 
     getUsers : async (req, res) => {
