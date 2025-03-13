@@ -76,7 +76,7 @@ module.exports = {
             [mobile],
             (error, results, fields) => {
                 const currentDate = new Date();
-                if (results.length > 0) {
+                if (results) {
                     return callBack(null, results[0]);
                 }else{
                     pool.query(
